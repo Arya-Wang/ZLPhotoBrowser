@@ -35,6 +35,13 @@ class ZLAddPhotoCell: UICollectionViewCell {
         return view
     }()
     
+    private lazy var titleLabel: UILabel = {
+        let view = UILabel()
+        view.textAlignment = .center
+        view.numberOfLines = 0
+        return view
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -51,9 +58,10 @@ class ZLAddPhotoCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-        imageView.frame = CGRect(x: 0, y: 0, width: bounds.width / 3, height: bounds.width / 3)
-        imageView.center = CGPoint(x: bounds.midX, y: bounds.midY)
+        imageView.frame = CGRect(x: bounds.width / 2 - 10, y: 14, width: 20, height: 20)
+        titleLabel.frame = CGRect(x: 0, y: CGRectGetMaxY(imageView.frame) + 4, width: bounds.width, height: 44)
+        let size = titleLabel.sizeThatFits(CGSize(width: titleLabel.frame.size.width, height: CGFloat(MAXFLOAT)))
+        titleLabel.frame = CGRect(x: 0, y: CGRectGetMaxY(imageView.frame) + 4, width: bounds.width, height: size.height)
     }
     
     func setupUI() {
@@ -63,6 +71,14 @@ class ZLAddPhotoCell: UICollectionViewCell {
         }
         
         backgroundColor = .zl.cameraCellBgColor
+        layer.borderColor = UIColor(red: 0.93, green: 0.93, blue: 0.93, alpha: 1).cgColor
+        layer.borderWidth = 1.0
+        
         contentView.addSubview(imageView)
+        contentView.addSubview(titleLabel)
+
+        titleLabel.text = "添加可访\n问的照片"
+        titleLabel.font = UIFont(name: "PingFangSC-Regular", size: 12)  ?? UIFont.systemFont(ofSize: 12, weight: .medium)
+        titleLabel.textColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
     }
 }

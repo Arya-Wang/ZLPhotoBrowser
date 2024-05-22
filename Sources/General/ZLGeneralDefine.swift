@@ -30,17 +30,20 @@ import Photos
 let ZLMaxImageWidth: CGFloat = 500
 
 enum ZLLayout {
-    static let navTitleFont: UIFont = .zl.font(ofSize: 17)
+
+    static let navTitleFont: UIFont = UIFont(name: "PingFangSC-Medium", size: 16)  ?? UIFont.systemFont(ofSize: 16, weight: .medium)
     
-    static let bottomToolViewH: CGFloat = 55
+    static let bottomToolViewH: CGFloat = 46
     
-    static let bottomToolBtnH: CGFloat = 34
+    static let bottomToolBtnH: CGFloat = 30
     
     static let bottomToolBtnY: CGFloat = 10
     
-    static let bottomToolTitleFont: UIFont = .zl.font(ofSize: 17)
+    static let bottomToolTitleFont: UIFont = UIFont(name: "PingFangSC-Medium", size: 14)  ?? UIFont.systemFont(ofSize: 14, weight: .medium)
     
-    static let bottomToolBtnCornerRadius: CGFloat = 5
+    static let bottomToolLeftTitleFont: UIFont =  UIFont(name: "PingFangSC-Regular", size: 12)  ?? UIFont.systemFont(ofSize: 12, weight: .regular)
+
+    static let bottomToolBtnCornerRadius: CGFloat = 15
 }
 
 func markSelected(source: inout [ZLPhotoModel], selected: inout [ZLPhotoModel]) {

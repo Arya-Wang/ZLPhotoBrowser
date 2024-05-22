@@ -155,8 +155,8 @@ class ViewController: UIViewController {
     }
     
     func showImagePicker(_ preview: Bool) {
-        let minItemSpacing: CGFloat = 2
-        let minLineSpacing: CGFloat = 2
+        let minItemSpacing: CGFloat = 4
+        let minLineSpacing: CGFloat = 4
         
         // Custom UI
         ZLPhotoUIConfiguration.default()
@@ -164,9 +164,22 @@ class ViewController: UIViewController {
 //            .navViewBlurEffectOfAlbumList(nil)
 //            .indexLabelBgColor(.black)
 //            .indexLabelTextColor(.white)
+            .showIndexOnSelectBtn(true)
+            .sortAscending(false)
+            .navTitleColor(UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1))
+            .bottomToolViewBgColor(UIColor.white)
+            .thumbnailBgColor(UIColor.white)
+            .navBarColor(UIColor.white)
+            .showEnterSettingTips(false)
+            .cellCornerRadio(8.0)
+            .bottomToolViewBtnDisableBgColor(UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1))
+            .bottomViewBlurEffectOfAlbumList(nil)
+            .cameraCellBgColor(UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1))
+            .cameraCellBgColor(UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1))
             .minimumInteritemSpacing(minItemSpacing)
             .minimumLineSpacing(minLineSpacing)
-            .columnCountBlock { Int(ceil($0 / (428.0 / 4))) }
+            .columnCount(4)
+            .selectedMaskColor(UIColor(red: 0, green: 0, blue: 0, alpha: 0.4))
             .showScrollToBottomBtn(true)
             
         if ZLPhotoUIConfiguration.default().languageType == .arabic {

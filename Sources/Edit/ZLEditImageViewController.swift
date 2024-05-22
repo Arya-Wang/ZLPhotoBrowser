@@ -245,7 +245,7 @@ open class ZLEditImageViewController: UIViewController {
     
     @objc public lazy var cancelBtn: ZLEnlargeButton = {
         let btn = ZLEnlargeButton(type: .custom)
-        btn.titleLabel?.font = ZLLayout.navTitleFont
+        btn.titleLabel?.font = ZLLayout.bottomToolTitleFont
         btn.setTitleColor(.zl.bottomToolViewDoneBtnNormalTitleColor, for: .normal)
         btn.setTitle(localLanguageTextValue(.cancel), for: .normal)
         btn.addTarget(self, action: #selector(cancelBtnClick), for: .touchUpInside)
@@ -552,7 +552,7 @@ open class ZLEditImageViewController: UIViewController {
             .zl.boundingRect(
                 font: ZLLayout.bottomToolTitleFont,
                 limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 28)
-            ).width
+            ).width 
         if isRTL() {
             cancelBtn.frame = CGRect(x: view.zl.width - 20 - 28, y: insets.top, width: cancelBtnW, height: 30)
             redoBtn.frame = CGRect(x: 15, y: insets.top, width: 30, height: 30)

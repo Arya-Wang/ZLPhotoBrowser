@@ -79,6 +79,9 @@ class ZLCameraCell: UICollectionViewCell {
         
         contentView.addSubview(imageView)
         backgroundColor = .zl.cameraCellBgColor
+        
+        layer.borderColor = UIColor(red: 0.93, green: 0.93, blue: 0.93, alpha: 1).cgColor
+        layer.borderWidth = 1.0
     }
     
     private func setupSession() {

@@ -28,7 +28,7 @@ import UIKit
 import Photos
 
 class ZLThumbnailPhotoCell: UICollectionViewCell {
-    private let selectBtnWH: CGFloat = 24
+    private let selectBtnWH: CGFloat = 40
     
     private lazy var containerView = UIView()
     
@@ -85,14 +85,14 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
     
     lazy var indexLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .zl.indexLabelTextColor
-        label.backgroundColor = .zl.indexLabelBgColor
         if ZLPhotoUIConfiguration.default().showIndexOnSelectBtn {
-            label.font = .zl.font(ofSize: 14)
+            label.font = UIFont(name: "PingFangSC-Semibold", size: 12)  ?? UIFont.systemFont(ofSize: 12, weight: .medium)
             label.textAlignment = .center
-            label.layer.cornerRadius = selectBtnWH / 2
-            label.layer.masksToBounds = true
+            label.textColor = UIColor.white
+            label.backgroundColor = UIColor.clear
         } else {
+            label.textColor = .zl.indexLabelTextColor
+            label.backgroundColor = .zl.indexLabelBgColor
             label.font = .zl.font(ofSize: 14, bold: true)
             label.textAlignment = .left
         }
@@ -139,9 +139,9 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
         contentView.addSubview(imageView)
         contentView.addSubview(coverView)
         contentView.addSubview(containerView)
+        containerView.addSubview(bottomShadowView)
         containerView.addSubview(btnSelect)
         containerView.addSubview(indexLabel)
-        containerView.addSubview(bottomShadowView)
         bottomShadowView.addSubview(videoTag)
         bottomShadowView.addSubview(livePhotoTag)
         bottomShadowView.addSubview(editImageTag)
@@ -160,7 +160,7 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
         
         containerView.frame = bounds
         coverView.frame = bounds
-        btnSelect.frame = CGRect(x: bounds.width - 32, y: 8, width: selectBtnWH, height: selectBtnWH)
+        btnSelect.frame = CGRect(x: bounds.width - selectBtnWH, y: bounds.width - selectBtnWH, width: selectBtnWH, height: selectBtnWH)
         if ZLPhotoUIConfiguration.default().showIndexOnSelectBtn {
             indexLabel.frame = btnSelect.frame
         } else {
@@ -229,7 +229,11 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
                 editImageTag.isHidden = false
                 descLabel.text = ""
             } else {
-                bottomShadowView.isHidden = true
+                bottomShadowView.isHidden = false
+                videoTag.isHidden = true
+                livePhotoTag.isHidden = true
+                editImageTag.isHidden = true
+                descLabel.text = ""
             }
         }
         
