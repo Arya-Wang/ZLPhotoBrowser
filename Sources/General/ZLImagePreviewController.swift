@@ -79,21 +79,20 @@ public class ZLImagePreviewController: UIViewController {
     
     private lazy var navView: UIView = {
         let view = UIView()
-        view.backgroundColor = .zl.navBarColorOfPreviewVC
+        view.backgroundColor = UIColor.clear
         return view
     }()
     
-    private var navBlurView: UIVisualEffectView?
-    
+    private lazy var gradientImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage.zl.getImage("zl_gradient")
+        view.contentMode = .scaleToFill
+        return view
+    }()
+  
     private lazy var backBtn: UIButton = {
         let btn = UIButton(type: .custom)
         var image = UIImage.zl.getImage("zl_navBack")
-        if isRTL() {
-            image = image?.imageFlippedForRightToLeftLayoutDirection()
-            btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -10)
-        } else {
-            btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: -10, bottom: 0, right: 0)
-        }
         btn.setImage(image, for: .normal)
         btn.addTarget(self, action: #selector(backBtnClick), for: .touchUpInside)
         return btn
@@ -101,9 +100,20 @@ public class ZLImagePreviewController: UIViewController {
     
     private lazy var indexLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .zl.indexLabelTextColor
-        label.font = ZLLayout.navTitleFont
+        label.textColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        label.font = UIFont(name: "PingFangSC-Medium", size: 12)
         label.textAlignment = .center
+        label.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.25)
+        label.layer.cornerRadius = 10
+        label.layer.masksToBounds = true
+        return label
+    }()
+    
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        label.font = UIFont(name: "PingFangSC-Medium", size: 14)
+        label.textAlignment = .left
         return label
     }()
     
@@ -137,6 +147,14 @@ public class ZLImagePreviewController: UIViewController {
         return btn
     }()
     
+    // 保存按钮
+    private lazy var saveBtn: UIButton = {
+        let btn = UIButton(type: .custom)
+        var image = UIImage.zl.getImage("zl_bottom_save")
+        btn.setImage(image, for: .normal)
+        btn.addTarget(self, action: #selector(saveBtnClick), for: .touchUpInside)
+        return btn
+    }()
     private var isFirstAppear = true
     
     private var hideNavView = false
@@ -172,8 +190,9 @@ public class ZLImagePreviewController: UIViewController {
     @objc public init(
         datas: [Any],
         index: Int = 0,
-        showSelectBtn: Bool = true,
-        showBottomView: Bool = true,
+        showSelectBtn: Bool = false,
+        showBottomView: Bool = false,
+        titleString: String = "",
         urlType: ((URL) -> ZLURLType)? = nil,
         urlImageLoader: ZLImageLoaderBlock? = nil
     ) {
@@ -187,6 +206,7 @@ public class ZLImagePreviewController: UIViewController {
         self.urlType = urlType
         self.urlImageLoader = urlImageLoader
         super.init(nibName: nil, bundle: nil)
+        self.titleLabel.text = titleString
     }
     
     @available(*, unavailable)
@@ -220,7 +240,7 @@ public class ZLImagePreviewController: UIViewController {
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+        var insets = UIEdgeInsets(top: 20, left: 4, bottom: 0, right: 0)
         if #available(iOS 11.0, *) {
             insets = view.safeAreaInsets
         }
@@ -232,25 +252,29 @@ public class ZLImagePreviewController: UIViewController {
             width: view.zl.width + ZLPhotoPreviewController.colItemSpacing,
             height: view.zl.height
         )
+        collectionView.backgroundColor = UIColor.black
         
         let navH = insets.top + 44
         navView.frame = CGRect(x: 0, y: 0, width: view.zl.width, height: navH)
-        navBlurView?.frame = navView.bounds
-        
-        indexLabel.frame = CGRect(x: (view.zl.width - 80) / 2, y: insets.top, width: 80, height: 44)
-        
+         
         if isRTL() {
             backBtn.frame = CGRect(x: view.zl.width - insets.right - 60, y: insets.top, width: 60, height: 44)
             selectBtn.frame = CGRect(x: insets.left + 15, y: insets.top + (44 - 25) / 2, width: 25, height: 25)
         } else {
-            backBtn.frame = CGRect(x: insets.left, y: insets.top, width: 60, height: 44)
+            backBtn.frame = CGRect(x: 4, y: insets.top, width: 60, height: 44)
             selectBtn.frame = CGRect(x: view.zl.width - 40 - insets.right, y: insets.top + (44 - 25) / 2, width: 25, height: 25)
         }
+        
+        indexLabel.frame = CGRect(x: (view.zl.width - 12 - 36), y: insets.top, width: 36, height: 28)
+        titleLabel.frame = CGRect(x: CGRectGetMaxX(backBtn.frame), y: insets.top, width: 147, height: 44)
+        gradientImageView.frame = CGRect(x: 0, y: 0, width: view.zl.width, height: 110)
         
         let bottomViewH = ZLLayout.bottomToolViewH
         
         bottomView.frame = CGRect(x: 0, y: view.zl.height - insets.bottom - bottomViewH, width: view.zl.width, height: bottomViewH + insets.bottom)
         bottomBlurView?.frame = bottomView.bounds
+        
+        saveBtn.frame = CGRect(x: (view.zl.width - 12 - 49), y: view.zl.height - 49 - insets.bottom, width: 49, height: 49)
         
         resetBottomViewFrame()
         
@@ -289,15 +313,12 @@ public class ZLImagePreviewController: UIViewController {
         automaticallyAdjustsScrollViewInsets = false
         
         view.addSubview(navView)
-        
-        if let effect = ZLPhotoUIConfiguration.default().navViewBlurEffectOfPreview {
-            navBlurView = UIVisualEffectView(effect: effect)
-            navView.addSubview(navBlurView!)
-        }
-        
+        view.addSubview(gradientImageView)
+
         navView.addSubview(backBtn)
         navView.addSubview(indexLabel)
         navView.addSubview(selectBtn)
+        navView.addSubview(titleLabel)
         view.addSubview(collectionView)
         view.addSubview(bottomView)
         
@@ -308,10 +329,11 @@ public class ZLImagePreviewController: UIViewController {
         
         bottomView.addSubview(doneBtn)
         view.bringSubviewToFront(navView)
+        view.addSubview(saveBtn)
     }
     
     private func resetSubViewStatus() {
-        indexLabel.text = String(currentIndex + 1) + " / " + String(datas.count)
+        indexLabel.text = String(currentIndex + 1) + "/" + String(datas.count)
         
         if showSelectBtn {
             selectBtn.isSelected = selectStatus[currentIndex]
@@ -387,6 +409,11 @@ public class ZLImagePreviewController: UIViewController {
         }
         
         dismiss()
+    }
+    
+    
+    @objc private func saveBtnClick() {
+        saveImage()
     }
     
     private func tapPreviewCell() {
@@ -466,9 +493,9 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             if config.allowSelectGif, model.type == .gif {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ZLGifPreviewCell.zl.identifier, for: indexPath) as! ZLGifPreviewCell
                 
-                cell.singleTapBlock = { [weak self] in
-                    self?.tapPreviewCell()
-                }
+//                cell.singleTapBlock = { [weak self] in
+//                    self?.tapPreviewCell()
+//                }
                 
                 cell.model = model
                 baseCell = cell
@@ -487,9 +514,9 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             } else {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ZLPhotoPreviewCell.zl.identifier, for: indexPath) as! ZLPhotoPreviewCell
 
-                cell.singleTapBlock = { [weak self] in
-                    self?.tapPreviewCell()
-                }
+//                cell.singleTapBlock = { [weak self] in
+//                    self?.tapPreviewCell()
+//                }
 
                 cell.model = model
 
@@ -535,16 +562,16 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             #endif
         }
         
-        baseCell.singleTapBlock = { [weak self] in
-            self?.tapPreviewCell()
-        }
+//        baseCell.singleTapBlock = { [weak self] in
+//            self?.tapPreviewCell()
+//        }
         
         (baseCell as? ZLLocalImagePreviewCell)?.longPressBlock = { [weak self, weak baseCell] in
-            if let callback = self?.longPressBlock {
-                callback(self, baseCell?.currentImage, indexPath.row)
-            } else {
-                self?.showSaveImageAlert()
-            }
+//            if let callback = self?.longPressBlock {
+//                callback(self, baseCell?.currentImage, indexPath.row)
+//            } else {
+//                self?.showSaveImageAlert()
+//            }
         }
         
         return baseCell
@@ -559,24 +586,27 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
     }
     
     private func showSaveImageAlert() {
-        func saveImage() {
-            guard let cell = collectionView.cellForItem(at: IndexPath(row: currentIndex, section: 0)) as? ZLLocalImagePreviewCell, let image = cell.currentImage else {
-                return
-            }
-            
-            let hud = ZLProgressHUD.show(toast: .processing)
-            ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] suc, _ in
-                hud.hide()
-                if !suc {
-                    showAlertView(localLanguageTextValue(.saveImageError), self)
-                }
-            }
-        }
-        
-        let saveAction = ZLCustomAlertAction(title: localLanguageTextValue(.save), style: .default) { _ in
-            saveImage()
+        let saveAction = ZLCustomAlertAction(title: localLanguageTextValue(.save), style: .default) {[weak self] _ in
+            guard let self = self else { return }
+            self.saveImage()
         }
         let cancelAction = ZLCustomAlertAction(title: localLanguageTextValue(.cancel), style: .cancel, handler: nil)
         showAlertController(title: nil, message: "", style: .actionSheet, actions: [saveAction, cancelAction], sender: self)
     }
+    
+    // 暂时只能保存图片
+    private func saveImage() {
+        guard let cell = collectionView.cellForItem(at: IndexPath(row: currentIndex, section: 0)) as? ZLLocalImagePreviewCell, let image = cell.currentImage else {
+            return
+        }
+        
+        let hud = ZLProgressHUD.show(toast: .processing)
+        ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] suc, _ in
+            hud.hide()
+            if !suc {
+                showAlertView(localLanguageTextValue(.saveImageError), self)
+            }
+        }
+    }
+    
 }

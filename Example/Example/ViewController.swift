@@ -182,6 +182,7 @@ class ViewController: UIViewController {
             .selectedMaskColor(UIColor(red: 0, green: 0, blue: 0, alpha: 0.4))
             .showScrollToBottomBtn(true)
             
+            
         if ZLPhotoUIConfiguration.default().languageType == .arabic {
             UIView.appearance().semanticContentAttribute = .forceRightToLeft
         } else {
@@ -207,6 +208,7 @@ class ViewController: UIViewController {
              .showFlashSwitch(true)
           */
         ZLPhotoConfiguration.default()
+            .allowPreviewPhotos(true)
             // You can first determine whether the asset is allowed to be selected.
             .canSelectAsset { _ in true }
             .didSelectAsset { _ in }
@@ -333,7 +335,7 @@ class ViewController: UIViewController {
         )
         
         let videoSuffixs = ["mp4", "mov", "avi", "rmvb", "rm", "flv", "3gp", "wmv", "vob", "dat", "m4v", "f4v", "mkv"] // and more suffixs
-        let vc = ZLImagePreviewController(datas: datas, index: 0, showSelectBtn: true) { url -> ZLURLType in
+        let vc = ZLImagePreviewController(datas: datas, index: 0, showSelectBtn: false, titleString: "测试") { url -> ZLURLType in
             // Just for demo.
             if url.absoluteString == netVideoUrlString {
                 return .video
