@@ -1,8 +1,8 @@
 //
-//  NSError+ZLPhotoBrowser.swift
+//  AVCaptureDevice.swift
 //  ZLPhotoBrowser
 //
-//  Created by long on 2022/8/3.
+//  Created by tsinis on 2024/11/1.
 //
 //  Copyright (c) 2020 Long Zhang <495181165@qq.com>
 //
@@ -24,25 +24,23 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-import Foundation
+import AVFoundation
 
-extension NSError {
-    convenience init(message: String) {
-        let userInfo = [NSLocalizedDescriptionKey: message]
-        self.init(domain: "com.ZLPhotoBrowser.error", code: -1, userInfo: userInfo)
+extension AVCaptureDevice {
+    var defaultZoomFactor: CGFloat {
+        let fallback: CGFloat = 1.0
+        guard #available(iOS 13.0, *) else { return fallback }
+
+        if let wideAngleIndex = self.constituentDevices.firstIndex(where: { $0.deviceType == .builtInWideAngleCamera }) {
+            guard wideAngleIndex >= 1 else { return fallback }
+            return CGFloat(self.virtualDeviceSwitchOverVideoZoomFactors[wideAngleIndex - 1].doubleValue)
+        }
+
+        return fallback
+    }
+
+    func normalizedZoomFactor(for zoomFactor: CGFloat) -> CGFloat {
+        zoomFactor / self.defaultZoomFactor
     }
 }
 
-extension NSError {
-    static let noWriteAuthError = NSError(message: "No permission to write to the album")
-    
-    static let videoMergeError = NSError(message: "video merge failed")
-    
-    static let videoExportTypeError = NSError(message: "The mediaType of asset must be video")
-    
-    static let videoExportError = NSError(message: "Video export failed")
-    
-    static let assetSaveError = NSError(message: "Asset save failed")
-    
-    static let timeoutError = NSError(message: "timeout")
-}

@@ -1,8 +1,8 @@
 //
-//  NSError+ZLPhotoBrowser.swift
+//  PHPhotoLibrary+ZLPhotoBrowser.swift
 //  ZLPhotoBrowser
 //
-//  Created by long on 2022/8/3.
+//  Created by long on 2024/8/15.
 //
 //  Copyright (c) 2020 Long Zhang <495181165@qq.com>
 //
@@ -24,25 +24,29 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-import Foundation
+import Photos
 
-extension NSError {
-    convenience init(message: String) {
-        let userInfo = [NSLocalizedDescriptionKey: message]
-        self.init(domain: "com.ZLPhotoBrowser.error", code: -1, userInfo: userInfo)
+extension ZLPhotoBrowserWrapper where Base: PHPhotoLibrary {
+    enum ZLAccessLevel {
+        case addOnly
+        case readWrite
+        
+        @available(iOS 14.0, *)
+        var toPHLevel: PHAccessLevel {
+            switch self {
+            case .addOnly:
+                return .addOnly
+            case .readWrite:
+                return .readWrite
+            }
+        }
     }
-}
-
-extension NSError {
-    static let noWriteAuthError = NSError(message: "No permission to write to the album")
     
-    static let videoMergeError = NSError(message: "video merge failed")
-    
-    static let videoExportTypeError = NSError(message: "The mediaType of asset must be video")
-    
-    static let videoExportError = NSError(message: "Video export failed")
-    
-    static let assetSaveError = NSError(message: "Asset save failed")
-    
-    static let timeoutError = NSError(message: "timeout")
+    static func authStatus(for level: ZLAccessLevel) -> PHAuthorizationStatus {
+        if #available(iOS 14.0, *) {
+            return PHPhotoLibrary.authorizationStatus(for: level.toPHLevel)
+        } else {
+            return PHPhotoLibrary.authorizationStatus()
+        }
+    }
 }

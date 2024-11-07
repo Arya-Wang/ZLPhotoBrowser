@@ -165,7 +165,7 @@ class ZLThumbnailViewController: UIViewController {
     
     private let showLimitAuthTipsView: Bool = {
         if #available(iOS 14.0, *),
-           PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited,
+           PHPhotoLibrary.zl.authStatus(for: .readWrite) == .limited,
            ZLPhotoUIConfiguration.default().showEnterSettingTips {
             return true
         } else {
@@ -226,7 +226,9 @@ class ZLThumbnailViewController: UIViewController {
     
     @available(iOS 14, *)
     var showAddPhotoCell: Bool {
-        PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited && ZLPhotoUIConfiguration.default().showAddPhotoButton && albumList.isCameraRoll
+        PHPhotoLibrary.zl.authStatus(for: .readWrite) == .limited
+        && ZLPhotoUIConfiguration.default().showAddPhotoButton
+        && albumList.isCameraRoll
     }
     
     private var hiddenStatusBar = false {
@@ -268,7 +270,7 @@ class ZLThumbnailViewController: UIViewController {
         loadPhotos()
         
         // Register for the album change notification when the status is limited, because the photoLibraryDidChange method will be repeated multiple times each time the album changes, causing the interface to refresh multiple times. So the album changes are not monitored in other authority.
-        if #available(iOS 14.0, *), PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited {
+        if #available(iOS 14.0, *), PHPhotoLibrary.zl.authStatus(for: .readWrite) == .limited {
             PHPhotoLibrary.shared().register(self)
         }
     }
@@ -306,7 +308,7 @@ class ZLThumbnailViewController: UIViewController {
         
         var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
         var collectionViewInsetTop: CGFloat = 20
-        if #available(iOS 11.0, *) {
+        if #available(iOS 11.0, *), deviceIsFringeScreen() {
             insets = view.safeAreaInsets
             collectionViewInsetTop = navViewNormalH
         } else {
@@ -334,7 +336,14 @@ class ZLThumbnailViewController: UIViewController {
         }
         
         let totalWidth = view.zl.width - insets.left - insets.right
-        collectionView.frame = CGRect(x: insets.left, y: 0, width: totalWidth, height: view.frame.height)
+        // 非刘海屏，在下拉返回动画时候，状态栏的隐藏和显示之间的切换会导致Collectionview的抖动，这里给个Y值，避开状态栏
+        let collectionViewY = deviceIsFringeScreen() ? 0 : insets.top
+        collectionView.frame = CGRect(
+            x: insets.left,
+            y: collectionViewY,
+            width: totalWidth,
+            height: view.frame.height - collectionViewY
+        )
         collectionView.contentInset = UIEdgeInsets(top: collectionViewInsetTop, left: 0, bottom: bottomViewH, right: 0)
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: insets.top, left: 0, bottom: bottomViewH, right: 0)
 
@@ -367,7 +376,37 @@ class ZLThumbnailViewController: UIViewController {
         }
         
         if showBottomToolBtns {
+//<<<<<<< HEAD
             refreshOriginlBtnFrame()
+//=======
+//            let btnMaxWidth = (bottomView.bounds.width - 30) / 3
+//            
+//            let btnY = showLimitAuthTipsView ? ZLLimitedAuthorityTipsView.height + ZLLayout.bottomToolBtnY : ZLLayout.bottomToolBtnY
+//            let previewTitle = localLanguageTextValue(.preview)
+//            let previewBtnW = previewTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width
+//            previewBtn.frame = CGRect(x: 15, y: btnY, width: min(btnMaxWidth, previewBtnW), height: btnH)
+//            
+//            let originalTitle = localLanguageTextValue(.originalPhoto)
+//            let originBtnW = originalTitle.zl.boundingRect(
+//                font: ZLLayout.bottomToolTitleFont,
+//                limitSize: CGSize(
+//                    width: CGFloat.greatestFiniteMagnitude,
+//                    height: 30
+//                )
+//            ).width + (originalBtn.currentImage?.size.width ?? 19) + 12
+//            let originBtnMaxW = min(btnMaxWidth, originBtnW)
+//            originalBtn.frame = CGRect(x: (bottomView.zl.width - originBtnMaxW) / 2 - 5, y: btnY, width: originBtnMaxW, height: btnH)
+//            
+//            let originalLabelH = originalLabel.font.lineHeight
+//            let originalLabelY = min(originalBtn.zl.bottom, bottomView.zl.height - originalLabelH)
+//            originalLabel.frame = CGRect(
+//                x: (bottomView.zl.width - btnMaxWidth) / 2 - 5,
+//                y: originalLabelY,
+//                width: btnMaxWidth,
+//                height: originalLabelH
+//            )
+//            
+//>>>>>>> upstream/master
             refreshDoneBtnFrame()
         }
     }
@@ -402,6 +441,10 @@ class ZLThumbnailViewController: UIViewController {
         
         bottomView.addSubview(bottomLineView)
         bottomView.addSubview(previewBtn)
+//<<<<<<< HEAD
+//=======
+//        bottomView.addSubview(originalLabel)
+//>>>>>>> upstream/master
         bottomView.addSubview(originalBtn)
         bottomView.addSubview(doneBtn)
         
@@ -573,6 +616,10 @@ class ZLThumbnailViewController: UIViewController {
             return
         }
         let vc = ZLPhotoPreviewController(photos: nav.arrSelectedModels, index: 0)
+        vc.backBlock = { [weak self] in
+            guard let `self` = self, self.hiddenStatusBar else { return }
+            self.hiddenStatusBar = false
+        }
         show(vc, sender: nil)
     }
     
@@ -986,8 +1033,8 @@ class ZLThumbnailViewController: UIViewController {
     private func save(image: UIImage?, videoUrl: URL?) {
         if let image {
             let hud = ZLProgressHUD.show(toast: .processing)
-            ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] suc, asset in
-                if suc, let asset {
+            ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] error, asset in
+                if error == nil, let asset {
                     let model = ZLPhotoModel(asset: asset)
                     self?.handleDataArray(newModel: model)
                 } else {
@@ -997,8 +1044,8 @@ class ZLThumbnailViewController: UIViewController {
             }
         } else if let videoUrl {
             let hud = ZLProgressHUD.show(toast: .processing)
-            ZLPhotoManager.saveVideoToAlbum(url: videoUrl) { [weak self] suc, asset in
-                if suc, let asset {
+            ZLPhotoManager.saveVideoToAlbum(url: videoUrl) { [weak self] error, asset in
+                if error == nil, let asset {
                     let model = ZLPhotoModel(asset: asset)
                     self?.handleDataArray(newModel: model)
                 } else {
@@ -1032,15 +1079,17 @@ class ZLThumbnailViewController: UIViewController {
         if !config.allowMixSelect, newModel.type == .video {
             canSelect = false
         }
-        // 单选模式，且不显示选择按钮时，不允许选择
-        if config.maxSelectCount == 1, !config.showSelectBtnWhenSingleSelect {
-            canSelect = false
-        }
+        
+        // 是否是单选模式，且不显示选择按钮
+        let isSingleAndNotShowSelectBtnMode = config.maxSelectCount == 1 && !config.showSelectBtnWhenSingleSelect
+        
         if canSelect, canAddModel(newModel, currentSelectCount: nav?.arrSelectedModels.count ?? 0, sender: self, showAlert: false) {
             if !shouldDirectEdit(newModel) {
-                newModel.isSelected = true
-                nav?.arrSelectedModels.append(newModel)
-                config.didSelectAsset?(newModel.asset)
+                if config.callbackDirectlyAfterTakingPhoto || !isSingleAndNotShowSelectBtnMode {
+                    newModel.isSelected = true
+                    nav?.arrSelectedModels.append(newModel)
+                    config.didSelectAsset?(newModel.asset)
+                }
                 
                 if config.callbackDirectlyAfterTakingPhoto {
                     doneBtnClick()
@@ -1115,8 +1164,8 @@ class ZLThumbnailViewController: UIViewController {
             let vc = ZLEditVideoViewController(avAsset: avAsset)
             vc.editFinishBlock = { [weak self, weak nav] url in
                 if let url = url {
-                    ZLPhotoManager.saveVideoToAlbum(url: url) { [weak self, weak nav] suc, asset in
-                        if suc, let asset = asset {
+                    ZLPhotoManager.saveVideoToAlbum(url: url) { [weak self, weak nav] error, asset in
+                        if error == nil, let asset {
                             let m = ZLPhotoModel(asset: asset)
                             m.isSelected = true
                             nav?.arrSelectedModels.append(m)
@@ -1648,7 +1697,7 @@ class ZLEmbedAlbumListNavView: UIView {
         super.layoutSubviews()
         
         var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
-        if #available(iOS 11.0, *) {
+        if #available(iOS 11.0, *), deviceIsFringeScreen() {
             insets = safeAreaInsets
         }
         
@@ -1658,7 +1707,41 @@ class ZLEmbedAlbumListNavView: UIView {
     }
     
     private func refreshTitleViewFrame() {
-     
+//<<<<<<< HEAD
+//     
+//=======
+//        var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+//        if #available(iOS 11.0, *), deviceIsFringeScreen() {
+//            insets = safeAreaInsets
+//        }
+//        
+//        navBlurView?.frame = bounds
+//        
+//        let albumTitleW = min(
+//            bounds.width / 2,
+//            title.zl.boundingRect(
+//                font: ZLLayout.navTitleFont,
+//                limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 44)
+//            ).width
+//        )
+//        let titleBgControlW = albumTitleW + ZLEmbedAlbumListNavView.arrowH + 20
+//        
+//        UIView.animate(withDuration: 0.25) {
+//            self.titleBgControl.frame = CGRect(
+//                x: (self.frame.width - titleBgControlW) / 2,
+//                y: insets.top + (44 - ZLEmbedAlbumListNavView.titleViewH) / 2,
+//                width: titleBgControlW,
+//                height: ZLEmbedAlbumListNavView.titleViewH
+//            )
+//            self.albumTitleLabel.frame = CGRect(x: 10, y: 0, width: albumTitleW, height: ZLEmbedAlbumListNavView.titleViewH)
+//            self.arrow.frame = CGRect(
+//                x: self.albumTitleLabel.frame.maxX + 5,
+//                y: (ZLEmbedAlbumListNavView.titleViewH - ZLEmbedAlbumListNavView.arrowH) / 2.0,
+//                width: ZLEmbedAlbumListNavView.arrowH,
+//                height: ZLEmbedAlbumListNavView.arrowH
+//            )
+//        }
+//>>>>>>> upstream/master
     }
     
     private func setupUI() {
@@ -1738,7 +1821,7 @@ class ZLExternalAlbumListNavView: UIView {
         super.layoutSubviews()
         
         var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
-        if #available(iOS 11.0, *) {
+        if #available(iOS 11.0, *), deviceIsFringeScreen() {
             insets = safeAreaInsets
         }
         

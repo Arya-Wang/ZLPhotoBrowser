@@ -107,7 +107,7 @@ func deviceSafeAreaInsets() -> UIEdgeInsets {
 }
 
 func deviceIsFringeScreen() -> Bool {
-    return deviceSafeAreaInsets().top > 0
+    return deviceSafeAreaInsets().top > 20
 }
 
 func isSmallScreen() -> Bool {
@@ -152,6 +152,16 @@ func canAddModel(_ model: ZLPhotoModel, currentSelectCount: Int, sender: UIViewC
     
     guard config.canSelectAsset?(model.asset) ?? true else {
         return false
+    }
+    
+    if config.allowSelectVideo == true {
+        if currentSelectCount >= config.maxSelectCount {
+            if showAlert {
+                let message = String(format: localLanguageTextValue(.exceededMaxVideoSelectCount), config.maxSelectCount)
+                showAlertView(message, sender)
+            }
+            return false
+        }
     }
     
     if currentSelectCount >= config.maxSelectCount {

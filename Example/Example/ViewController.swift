@@ -147,23 +147,18 @@ class ViewController: UIViewController {
     }
     
     @objc func previewSelectPhoto() {
-        showImagePicker(true)
+        showImagePicker(isVideo: true)
     }
     
     @objc func librarySelectPhoto() {
-        showImagePicker(false)
+        showImagePicker(isVideo: false)
     }
     
-    func showImagePicker(_ preview: Bool) {
+    private func showImagePicker(isVideo: Bool) {
         let minItemSpacing: CGFloat = 4
         let minLineSpacing: CGFloat = 4
-        
         // Custom UI
         ZLPhotoUIConfiguration.default()
-//            .navBarColor(.white)
-//            .navViewBlurEffectOfAlbumList(nil)
-//            .indexLabelBgColor(.black)
-//            .indexLabelTextColor(.white)
             .showIndexOnSelectBtn(true)
             .sortAscending(false)
             .navTitleColor(UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1))
@@ -181,94 +176,68 @@ class ViewController: UIViewController {
             .columnCount(4)
             .selectedMaskColor(UIColor(red: 0, green: 0, blue: 0, alpha: 0.4))
             .showScrollToBottomBtn(true)
-            
-            
+        
+        
+        ZLPhotoUIConfiguration.default().languageType = .chineseSimplified
         if ZLPhotoUIConfiguration.default().languageType == .arabic {
             UIView.appearance().semanticContentAttribute = .forceRightToLeft
         } else {
             UIView.appearance().semanticContentAttribute = .unspecified
         }
         
-        // Custom image editor
-        ZLPhotoConfiguration.default()
-            .editImageConfiguration
-            .imageStickerContainerView(ImageStickerContainerView())
-//            .tools([.draw, .clip, .mosaic, .filter])
-//            .adjustTools([.brightness, .contrast, .saturation])
-//            .clipRatios([.custom, .circle, .wh1x1, .wh3x4, .wh16x9, ZLImageClipRatio(title: "2 : 1", whRatio: 2 / 1)])
-//            .imageStickerContainerView(ImageStickerContainerView())
-//            .filters([.normal, .process, ZLFilter(name: "custom", applier: ZLCustomFilter.hazeRemovalFilter)])
-        
-        /*
-         ZLPhotoConfiguration.default()
-             .cameraConfiguration
-             .devicePosition(.front)
-             .allowRecordVideo(false)
-             .allowSwitchCamera(false)
-             .showFlashSwitch(true)
-          */
-        ZLPhotoConfiguration.default()
-            .allowPreviewPhotos(true)
-            // You can first determine whether the asset is allowed to be selected.
-            .canSelectAsset { _ in true }
-            .didSelectAsset { _ in }
-            .didDeselectAsset { _ in }
-            .noAuthorityCallback { type in
-                switch type {
-                case .library:
-                    debugPrint("No library authority")
-                case .camera:
-                    debugPrint("No camera authority")
-                case .microphone:
-                    debugPrint("No microphone authority")
-                }
-            }
-            .gifPlayBlock { imageView, data, _ in
-                let animatedImage = FLAnimatedImage(gifData: data)
-                
-                var animatedImageView: FLAnimatedImageView?
-                for subView in imageView.subviews {
-                    if let subView = subView as? FLAnimatedImageView {
-                        animatedImageView = subView
-                        break
-                    }
-                }
-                
-                if animatedImageView == nil {
-                    animatedImageView = FLAnimatedImageView()
-                    imageView.addSubview(animatedImageView!)
-                }
-                
-                animatedImageView?.frame = imageView.bounds
-                animatedImageView?.animatedImage = animatedImage
-                animatedImageView?.runLoopMode = .default
-            }
-            .pauseGIFBlock { $0.subviews.forEach { ($0 as? FLAnimatedImageView)?.stopAnimating() } }
-            .resumeGIFBlock { $0.subviews.forEach { ($0 as? FLAnimatedImageView)?.startAnimating() } }
-//            .operateBeforeDoneAction { currVC, block in
-//                // Do something before select photo result callback, and then call block to continue done action.
-//                block()
-//            }
+        if isVideo == false {
+            ZLPhotoConfiguration.default()
+                .allowSelectGif(false)
+                .allowSelectLivePhoto(true)
+                .allowSelectVideo(false)
+                .allowSelectImage(true)
+                .maxSelectCount(10)
+                .allowMixSelect(true)
+                .showSelectBtnWhenSingleSelect(true)
+                .alwaysRequestOriginal(true)
+                .allowSelectOriginal(false)
+
+                .cameraConfiguration
+                .devicePosition(.front)
+                .allowRecordVideo(false)
+                .allowSwitchCamera(true)
+                .showFlashSwitch(true)
+
+        } else {
+            ZLPhotoConfiguration.default()
+                .allowSelectGif(false)
+                .allowSelectLivePhoto(false)
+                .allowSelectVideo(true)
+                .allowSelectImage(false)
+                .maxSelectVideoDuration(864000)
+                .maxSelectCount(1)
+                .showSelectBtnWhenSingleSelect(true)
+                .allowSelectOriginal(true)
+            
+                .cameraConfiguration
+                .devicePosition(.front)
+                .allowRecordVideo(true)
+                .allowSwitchCamera(true)
+                .showFlashSwitch(true)
+                .showFlashSwitch(true)
+                .maxRecordDuration(120)
+
+            ZLPhotoConfiguration.default()
+                .allowSelectImage(false)
+                .maxSelectCount(1)
+        }
         
         /// Using this init method, you can continue editing the selected photo
-        let ac = ZLPhotoPreviewSheet(results: takeSelectedAssetsSwitch.isOn ? selectedResults : nil)
+        let ac = ZLPhotoPreviewSheet(results: selectedResults)
         
-//        let ac = ZLPhotoPreviewSheet(selectedAssets: takeSelectedAssetsSwitch.isOn ? selectedAssets : nil)
+        //        let ac = ZLPhotoPreviewSheet(selectedAssets: takeSelectedAssetsSwitch.isOn ? selectedAssets : nil)
         
         ac.selectImageBlock = { [weak self] results, isOriginal in
             guard let `self` = self else { return }
-            self.selectedResults = results
-            self.selectedImages = results.map { $0.image }
-            self.selectedAssets = results.map { $0.asset }
+            let selectedResultsArray = results
+            let selectedImagesArray = results.map { $0.image }
             self.isOriginal = isOriginal
-            self.collectionView.reloadData()
-            debugPrint("images: \(self.selectedImages)")
-            debugPrint("assets: \(self.selectedAssets)")
-            debugPrint("isEdited: \(results.map { $0.isEdited })")
-            debugPrint("isOriginal: \(isOriginal)")
             
-//            guard !self.selectedAssets.isEmpty else { return }
-//            self.saveAsset(self.selectedAssets[0])
         }
         ac.cancelBlock = {
             debugPrint("cancel select")
@@ -276,14 +245,8 @@ class ViewController: UIViewController {
         ac.selectImageRequestErrorBlock = { errorAssets, errorIndexs in
             debugPrint("fetch error assets: \(errorAssets), error indexs: \(errorIndexs)")
         }
-        
-        if preview {
-            ac.showPreview(animate: true, sender: self)
-        } else {
-            ac.showPhotoLibrary(sender: self)
-        }
+        ac.showPhotoLibrary(sender: self)
     }
-    
     func saveAsset(_ asset: PHAsset) {
         let filePath: String
         if asset.mediaType == .video {
@@ -368,6 +331,10 @@ class ViewController: UIViewController {
     }
     
     @objc func showCamera() {
+        // To enable tap-to-record you can also use tapToRecordVideo flag in camera config, for example:
+        // ZLPhotoConfiguration.default().cameraConfiguration = ZLPhotoConfiguration.default().cameraConfiguration
+        //  .tapToRecordVideo(true)
+        
         let camera = ZLCustomCamera()
         camera.takeDoneBlock = { [weak self] image, videoUrl in
             self?.save(image: image, videoUrl: videoUrl)
@@ -378,8 +345,8 @@ class ViewController: UIViewController {
     func save(image: UIImage?, videoUrl: URL?) {
         if let image = image {
             let hud = ZLProgressHUD.show(toast: .processing)
-            ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] suc, asset in
-                if suc, let asset = asset {
+            ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] error, asset in
+                if error == nil, let asset {
                     let resultModel = ZLResultModel(asset: asset, image: image, isEdited: false, index: 0)
                     self?.selectedResults = [resultModel]
                     self?.selectedImages = [image]
@@ -392,8 +359,8 @@ class ViewController: UIViewController {
             }
         } else if let videoUrl = videoUrl {
             let hud = ZLProgressHUD.show(toast: .processing)
-            ZLPhotoManager.saveVideoToAlbum(url: videoUrl) { [weak self] suc, asset in
-                if suc, let asset = asset {
+            ZLPhotoManager.saveVideoToAlbum(url: videoUrl) { [weak self] error, asset in
+                if error == nil, let asset {
                     self?.fetchImage(for: asset)
                 } else {
                     debugPrint("保存视频到相册失败")

@@ -91,21 +91,22 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
 ### Change Log
 > [More logs](https://github.com/longitachi/ZLPhotoBrowser/blob/master/CHANGELOG.md)
 ```
-● 4.5.2
-  Fix:
-    Fix the bug in the image cropping interface where the image is not displayed correctly when zooming in and the crop ratio is not 0.
-● 4.5.1
+● 4.5.6
   Add:
-    Add xcprivacy file to the project.
-  Fix:
-    Fix the bug causing a crash when continuously switching between front and rear cameras.
-    Fix the bug where the status bar in the album thumbnail interface sometimes does not display.
-● 4.5.0
+    Support iOS18.
+    When saving pictures and videos, add error parameters in the callback.
+● 4.5.5
   Add:
-    Adapt the text sticker input interface for iPad landscape mode.
+    The ZLImagePreviewController interface supports gesture-driven pull-down return animations.
+    Update the API for obtaining album permissions.
   Fix:
-    Resolve the issue causing errors during SPM installation.
-    Fix the bug where cropping square images to circular shape fails.
+    Fixed the bug that mosaics were not displayed during painting.
+● 4.5.4
+  Add:
+    Enhance the user experience of the image cropping interface and optimize the animation effects.
+    Support for setting `VideoMirrored` in the custom camera.
+  Fix:
+    Fix the issue where some UI elements are displayed incorrectly on phones without a notch.
 ...
 ```
 
@@ -161,7 +162,7 @@ Rebuild with --use-xcframeworks to create an xcframework bundle instead.` [Click
 
 #### Swift Package Manager
 1. Select File > Add Packages. Enter https://github.com/longitachi/ZLPhotoBrowser.git in the "Choose Package Repository" dialog.
-2. In the next page, specify the version resolving rule as "Up to Next Major" with "4.5.2" as its earliest version.
+2. In the next page, specify the version resolving rule as "Up to Next Major" with "4.5.6" as its earliest version.
 3. After Xcode checking out the source and resolving the version, you can choose the "ZLPhotoBrowser" library and add it to your app target.
 
 ### Support
