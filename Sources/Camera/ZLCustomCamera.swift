@@ -582,7 +582,7 @@ open class ZLCustomCamera: UIViewController {
         guard isWideCameraEnabled() else { return }
         do {
             try device.lockForConfiguration()
-//            device.videoZoomFactor = device.defaultZoomFactor
+            device.videoZoomFactor = device.defaultZoomFactor
             device.unlockForConfiguration()
         } catch {
             zl_debugPrint("Failed to set initial zoom factor: \(error.localizedDescription)")
@@ -1074,8 +1074,7 @@ open class ZLCustomCamera: UIViewController {
             return 1
         }
         if #available(iOS 11.0, *) {
-//            let factor = isWideCameraEnabled() ? device.defaultZoomFactor : 1
-            let factor = 1.0
+            let factor = isWideCameraEnabled() ? device.defaultZoomFactor : 1
             return min(15 * factor, device.maxAvailableVideoZoomFactor)
         } else {
             return min(15, device.activeFormat.videoMaxZoomFactor)
