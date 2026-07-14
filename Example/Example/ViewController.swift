@@ -202,6 +202,8 @@ class ViewController: UIViewController {
                 .allowRecordVideo(false)
                 .allowSwitchCamera(true)
                 .showFlashSwitch(true)
+            
+            ZLPhotoConfiguration.default().showOriginalSizeWhenSelectOriginal = false
 
         } else {
             ZLPhotoConfiguration.default()
@@ -221,6 +223,7 @@ class ViewController: UIViewController {
                 .showFlashSwitch(true)
                 .showFlashSwitch(true)
                 .maxRecordDuration(120)
+            ZLPhotoConfiguration.default().showOriginalSizeWhenSelectOriginal = false
 
             ZLPhotoConfiguration.default()
                 .allowSelectImage(false)

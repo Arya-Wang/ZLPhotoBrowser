@@ -89,7 +89,7 @@ class ZLPhotoPreviewController: UIViewController {
     private lazy var selectBtn: ZLEnlargeButton = {
         let btn = ZLEnlargeButton(type: .custom)
         btn.setImage(.zl.getImage("zl_btn_unselected_with_check"), for: .normal)
-        btn.setImage(.zl.getImage("zl_btn_selected"), for: .selected)
+        btn.setImage(.zl.getImage("zl_btn_preview_selected"), for: .selected)
         btn.enlargeInset = 10
         btn.addTarget(self, action: #selector(selectBtnClick), for: .touchUpInside)
         return btn

@@ -1423,7 +1423,7 @@ extension ZLThumbnailViewController: UICollectionViewDataSource, UICollectionVie
         guard arrDataSources.indices ~= index else {
             return
         }
-        return
+        
         let m = arrDataSources[index]
         if shouldDirectEdit(m) {
             return
