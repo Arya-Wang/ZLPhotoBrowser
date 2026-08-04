@@ -33,9 +33,9 @@ enum ZLLayout {
 
     static let navTitleFont: UIFont = UIFont(name: "PingFangSC-Medium", size: 16)  ?? UIFont.systemFont(ofSize: 16, weight: .medium)
     
-    static let bottomToolViewH: CGFloat = 46
+    static let bottomToolViewH: CGFloat = 58
     
-    static let bottomToolBtnH: CGFloat = 30
+    static let bottomToolBtnH: CGFloat = 28
     
     static let bottomToolBtnY: CGFloat = 10
     
@@ -43,7 +43,7 @@ enum ZLLayout {
     
     static let bottomToolLeftTitleFont: UIFont =  UIFont(name: "PingFangSC-Regular", size: 12)  ?? UIFont.systemFont(ofSize: 12, weight: .regular)
 
-    static let bottomToolBtnCornerRadius: CGFloat = 15
+    static let bottomToolBtnCornerRadius: CGFloat = 14
 }
 
 func markSelected(source: inout [ZLPhotoModel], selected: inout [ZLPhotoModel]) {

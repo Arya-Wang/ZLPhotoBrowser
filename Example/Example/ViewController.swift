@@ -151,7 +151,7 @@ class ViewController: UIViewController {
     }
     
     @objc func librarySelectPhoto() {
-        showImagePicker(isVideo: false)
+        showImagePicker(isVideo: true)
     }
     
     private func showImagePicker(isVideo: Bool) {

@@ -349,7 +349,7 @@ class ZLThumbnailViewController: UIViewController {
 
         let scrollToBottomSize = 35.0
         let scrollToBottomX = view.zl.width - insets.right - scrollToBottomSize - 22
-        let scrollToBottomY = view.zl.height - insets.bottom - bottomViewH - scrollToBottomSize - 30
+        let scrollToBottomY = view.zl.height - bottomViewH - scrollToBottomSize - 30
         scrollToBottomBtn.frame = CGRect(
             origin: CGPoint(x: scrollToBottomX, y: scrollToBottomY),
             size: CGSize(width: scrollToBottomSize, height: scrollToBottomSize)
@@ -367,7 +367,7 @@ class ZLThumbnailViewController: UIViewController {
         
         let btnH = ZLLayout.bottomToolBtnH
         
-        bottomView.frame = CGRect(x: 0, y: view.frame.height - insets.bottom - bottomViewH, width: view.bounds.width, height: bottomViewH + insets.bottom)
+        bottomView.frame = CGRect(x: 0, y: view.frame.height - bottomViewH, width: view.bounds.width, height: bottomViewH)
         bottomBlurView?.frame = bottomView.bounds
         bottomLineView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 1)
 
@@ -961,7 +961,7 @@ class ZLThumbnailViewController: UIViewController {
     }
     
     private func refreshOriginlBtnFrame() {
-        let btnH = ZLLayout.bottomToolViewH
+        let btnH = 48.0
         previewBtn.frame = CGRect(x: 12, y: 0, width: 84, height: btnH)
         
         let originalTitle = originalBtn.titleLabel?.text ?? ""
